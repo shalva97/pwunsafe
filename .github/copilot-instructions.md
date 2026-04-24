@@ -1,5 +1,9 @@
 # GitHub Copilot Instructions — pwunsafe
 
+## Purpose
+
+Developer-only credential store for the Android emulator. Saves test account credentials (service, username, password, passkeys) so the developer doesn't retype them during testing. **Intentionally unencrypted.** No sync, no accounts, no production security hardening needed or wanted.
+
 ## Stack
 
 - **Kotlin** 2.3.20, Multiplatform (Android target only)

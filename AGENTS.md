@@ -2,6 +2,8 @@
 
 ## Project
 
+**pwunsafe** is a developer-only local credential store for the Android emulator. It saves test account credentials (service, username, password, passkeys) to avoid manual re-typing during development. It is intentionally unencrypted — no security hardening, no sync, no accounts.
+
 Kotlin Multiplatform project targeting **Android only**, using Compose Multiplatform for UI.
 
 - **Language**: Kotlin 2.3.20
@@ -44,6 +46,12 @@ gradle/
 6. **JVM 11**: do not use APIs from Java 17+.
 7. **R resources**: `android.nonTransitiveRClass=true` — reference only resources declared in the same module.
 8. **Edge-to-edge**: insets are enabled globally — use `safeContentPadding()` or `WindowInsets` in composables.
+
+## Do Not Suggest
+
+- Encryption, Android Keystore, or security hardening — intentionally omitted by design.
+- Cloud sync, remote backup, or user accounts.
+- Biometric auth or app lock screens.
 
 ## Do Not
 

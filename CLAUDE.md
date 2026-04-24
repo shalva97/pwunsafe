@@ -2,6 +2,12 @@
 
 ## Project Overview
 
+**pwunsafe** is a developer-only, local password manager for the Android emulator. It stores test account credentials (username, password, passkeys) so the developer doesn't have to type them manually during testing. There are no real users and no sensitive data — the name is intentional.
+
+- Fully local: no network, no sync, no account, no encryption
+- Runs on Android emulator only
+- Stores: service name, username, password, passkeys
+
 Kotlin Multiplatform (KMP) project targeting **Android only**. Uses Compose Multiplatform for UI and Material3 for design.
 
 - **Package**: `com.example.pwunsafe`
@@ -63,11 +69,18 @@ All shared logic goes in `commonMain`; Android-specific code goes in `androidMai
 - Platform abstraction pattern: define a class/interface in `commonMain`, implement it in `androidMain`.
 - ViewModel is available via `libs.androidx.lifecycle.viewmodelCompose`.
 - `enableEdgeToEdge()` is called in `MainActivity` — respect system bar insets in composables (`safeContentPadding`, `WindowInsets`).
+- Follow Googles Android app architecture Guide.
 
 ### Build System
 - Gradle **configuration cache** and **build caching** are both enabled — keep tasks cache-friendly (no `System.currentTimeMillis()` in task outputs, etc.).
 - `android.nonTransitiveRClass=true` — only reference R resources from the module that declares them.
 - `enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")` is active in `settings.gradle.kts`.
+
+## What NOT to Suggest
+
+- Do not suggest encryption, keystores, or security hardening — this is intentionally unencrypted by design.
+- Do not suggest cloud sync, accounts, or remote backup.
+- Do not add biometric auth or lock screens — it's a dev tool, not a production app.
 
 ## What NOT to Do
 
