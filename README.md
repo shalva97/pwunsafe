@@ -1,28 +1,55 @@
-This is a Kotlin Multiplatform project targeting Android.
+# pwunsafe
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-    - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-    - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-      For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-      the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-      Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-      folder is the appropriate location.
+Developer-only, local password manager for the Android emulator. Stores test account credentials (service name, username, password, passkeys) so you don't retype them during development. **Intentionally unencrypted** — no real users, no sensitive data.
 
-### Build and Run Android Application
+## Features
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
+- Store and manage test credentials: service, username, password, passkeys
+- Fully local — no network, no sync, no account
+- Android emulator only
 
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+## Stack
 
----
+- **Kotlin** 2.3.20 · Kotlin Multiplatform (Android target)
+- **Compose Multiplatform** 1.10.3 · Material3
+- **Gradle** Kotlin DSL + version catalog
+- Min SDK 24 · Compile/Target SDK 36 · JVM 11
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Build
+
+```bash
+# Debug APK
+./gradlew :composeApp:assembleDebug
+
+# Release APK
+./gradlew :composeApp:assembleRelease
+
+# Install on connected device/emulator
+./gradlew :composeApp:installDebug
+
+# Run unit tests
+./gradlew :composeApp:test
+```
+
+## Releases
+
+Tagged releases are published automatically via GitHub Actions. Each `v*` tag triggers a release build and attaches the APK to the GitHub Release.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+## Source Layout
+
+```
+composeApp/src/
+  androidMain/kotlin/com/example/pwunsafe/
+    App.kt           – Root @Composable
+    MainActivity.kt  – Activity entry point (edge-to-edge)
+    Platform.kt      – AndroidPlatform + getPlatform()
+  commonMain/        – Shared logic
+  androidUnitTest/   – Unit tests
+gradle/
+  libs.versions.toml – Version catalog
+```
