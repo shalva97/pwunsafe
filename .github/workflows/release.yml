@@ -1,9 +1,8 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -28,12 +27,10 @@ jobs:
 
       - name: Rename APK
         run: |
-          TAG=${GITHUB_REF_NAME}
           mv composeApp/build/outputs/apk/release/composeApp-release-unsigned.apk \
-             composeApp/build/outputs/apk/release/pwunsafe-${TAG}.apk
+             composeApp/build/outputs/apk/release/pwunsafe-${{ github.event.release.tag_name }}.apk
 
-      - name: Create GitHub Release
+      - name: Upload APK to release
         uses: softprops/action-gh-release@v2
         with:
           files: composeApp/build/outputs/apk/release/pwunsafe-*.apk
-          generate_release_notes: true
