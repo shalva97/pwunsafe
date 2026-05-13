@@ -6,7 +6,7 @@ Developer-only, local password manager for the Android emulator. Stores test acc
 
 - Store and manage test credentials: service, username, password, passkeys
 - Fully local — no network, no sync, no account
-- Android emulator only
+- Can work on real device if you really want it
 
 ## Stack
 
