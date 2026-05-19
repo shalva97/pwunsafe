@@ -2,13 +2,16 @@ package com.example.pwunsafe.ui.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -20,29 +23,14 @@ import com.example.pwunsafe.ui.viewmodel.CredentialViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CredentialListScreen(viewModel: CredentialViewModel) {
+fun CredentialListScreen(
+    viewModel: CredentialViewModel,
+    onAddNew: () -> Unit,
+    onEdit: (String) -> Unit,
+) {
     val credentials by viewModel.credentials.collectAsState()
     val passwords = credentials.filter { it.passkey == null }
     val passkeys = credentials.filter { it.passkey != null }
-
-    var showAddEdit by remember { mutableStateOf(false) }
-    var editTarget by remember { mutableStateOf<Credential?>(null) }
-
-    if (showAddEdit) {
-        AddEditCredentialScreen(
-            initial = editTarget,
-            onSave = { cred ->
-                if (editTarget == null) viewModel.add(cred) else viewModel.update(cred)
-                showAddEdit = false
-                editTarget = null
-            },
-            onDismiss = {
-                showAddEdit = false
-                editTarget = null
-            },
-        )
-        return
-    }
 
     Scaffold(
         topBar = {
@@ -55,7 +43,7 @@ fun CredentialListScreen(viewModel: CredentialViewModel) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddEdit = true }) {
+            FloatingActionButton(onClick = onAddNew) {
                 Icon(Icons.Default.Add, contentDescription = "Add credential")
             }
         },
@@ -76,7 +64,7 @@ fun CredentialListScreen(viewModel: CredentialViewModel) {
                     items(passwords, key = { it.id }) { cred ->
                         PasswordItem(
                             credential = cred,
-                            onEdit = { editTarget = it; showAddEdit = true },
+                            onEdit = { onEdit(it.id) },
                             onDelete = { viewModel.delete(it) },
                         )
                     }
@@ -88,7 +76,7 @@ fun CredentialListScreen(viewModel: CredentialViewModel) {
                     items(passkeys, key = { it.id }) { cred ->
                         PasskeyItem(
                             credential = cred,
-                            onEdit = { editTarget = it; showAddEdit = true },
+                            onEdit = { onEdit(it.id) },
                             onDelete = { viewModel.delete(it) },
                         )
                     }

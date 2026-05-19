@@ -23,6 +23,7 @@ kotlin {
             implementation(libs.koin.androidx.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.androidx.credentials)
+            implementation(libs.androidx.navigation.compose)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
