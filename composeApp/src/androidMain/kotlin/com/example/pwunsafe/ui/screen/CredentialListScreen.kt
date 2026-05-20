@@ -4,10 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.pwunsafe.data.model.Credential
@@ -29,6 +27,7 @@ fun CredentialListScreen(
     onEdit: (String) -> Unit,
 ) {
     val credentials by viewModel.credentials.collectAsState()
+    val fileExists by viewModel.fileExists.collectAsState()
     val passwords = credentials.filter { it.passkey == null }
     val passkeys = credentials.filter { it.passkey != null }
 
@@ -50,10 +49,17 @@ fun CredentialListScreen(
     ) { padding ->
         if (credentials.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("No credentials yet. Tap + to add one.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (!fileExists) {
+                    NoFileWarning()
+                } else {
+                    Text(
+                        "No credentials yet. Tap + to add one.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
@@ -82,6 +88,61 @@ fun CredentialListScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun NoFileWarning() {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    "No credentials file found",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Text(
+                "The app stores credentials in the Downloads folder as pwunsafe_credentials.json. " +
+                    "To bring an existing file from your PC, run:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Surface(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                shape = MaterialTheme.shapes.small,
+            ) {
+                Text(
+                    "adb push pwunsafe_credentials.json \\\n  /sdcard/Download/",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                )
+            }
+            Text(
+                "Or drag the file onto the emulator window in Android Studio",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+            Text(
+                "Tap + to add a credential — the file will be created automatically.",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

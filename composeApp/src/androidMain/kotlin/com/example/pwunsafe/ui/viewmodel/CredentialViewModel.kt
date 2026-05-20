@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 class CredentialViewModel(private val repository: CredentialRepository) : ViewModel() {
 
     val credentials: StateFlow<List<Credential>> = repository.credentials
+    val fileExists: StateFlow<Boolean> = repository.fileExists
 
     fun add(credential: Credential) = viewModelScope.launch { repository.add(credential) }
 

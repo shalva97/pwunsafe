@@ -5,7 +5,7 @@
 **pwunsafe** is a developer-only, local password manager for the Android emulator. It stores test account credentials (username, password, passkeys) so the developer doesn't have to type them manually during testing. There are no real users and no sensitive data — the name is intentional.
 
 - Fully local: no network, no sync, no account, no encryption
-- Runs on Android emulator only
+- Runs on Android emulator
 - Stores: service name, username, password, passkeys
 
 Kotlin Multiplatform (KMP) project targeting **Android only**. Uses Compose Multiplatform for UI and Material3 for design.

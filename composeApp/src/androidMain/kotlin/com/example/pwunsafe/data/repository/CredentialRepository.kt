@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CredentialRepository {
     val credentials: StateFlow<List<Credential>>
+    val fileExists: StateFlow<Boolean>
     suspend fun add(credential: Credential)
     suspend fun update(credential: Credential)
     suspend fun delete(id: String)
