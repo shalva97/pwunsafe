@@ -1,62 +1,38 @@
 # pwunsafe — Agent Instructions
 
-## Project
+## Project Overview
 
-**pwunsafe** is a developer-only local credential store for the Android emulator. It saves test account credentials (service, username, password, passkeys) to avoid manual re-typing during development. It is intentionally unencrypted — no security hardening, no sync, no accounts.
+**pwunsafe** is a developer-only, local password manager for the Android emulator. It stores test account credentials (username, password, passkeys) so the developer doesn't have to type them manually during testing. There are no real users and no sensitive data — the name is intentional.
 
-Kotlin Multiplatform project targeting **Android only**, using Compose Multiplatform for UI.
+- Fully local: no network, no sync, no account, no encryption
+- Runs on Android
+- Stores: service name, username, password, passkeys
 
-- **Language**: Kotlin 2.3.20
-- **UI**: Compose Multiplatform 1.10.3 + Material3
+Kotlin Multiplatform (KMP) project targeting **Android only**. Uses Compose Multiplatform for UI and Material3 for design.
+
 - **Package**: `com.example.pwunsafe`
-- **Min SDK**: 24 | **Target/Compile SDK**: 36 | **JVM**: 11
-- **Build**: Gradle with Kotlin DSL (`build.gradle.kts`) + version catalog (`gradle/libs.versions.toml`)
+- **Application ID**: `com.example.pwunsafe`
+- **Kotlin**: 2.3.20 | **AGP**: 8.11.2 | **Compose Multiplatform**: 1.10.3
+- **Min SDK**: 24 | **Compile/Target SDK**: 36 | **JVM Target**: 11
 
-## Source Structure
+All shared logic goes in `commonMain`; Android-specific code goes in `androidMain`.
 
-```
-composeApp/src/
-  androidMain/kotlin/com/example/pwunsafe/
-    App.kt            Root @Composable
-    MainActivity.kt   Activity (edge-to-edge, sets content to App())
-    Platform.kt       AndroidPlatform class + getPlatform() factory
-    Greeting.kt       Domain class (uses Platform)
-  androidUnitTest/kotlin/com/example/pwunsafe/
-gradle/
-  libs.versions.toml  Version catalog (all deps and plugins)
-```
+## Key Rules
 
-## Essential Commands
+### Kotlin / Compose
+- Follow **Kotlin official code style** (`kotlin.code.style=official` in `gradle.properties`).
+- UI is built with **Jetpack Compose / Compose Multiplatform**.
+- Use `@Composable` functions; state hoisting is preferred over local `remember` in complex components.
+- Add `@Preview` annotations to composables for IDE previews.
+- Don't use JVM only API if possible
 
-| Task | Command |
-|------|---------|
-| Build debug | `./gradlew :composeApp:assembleDebug` |
-| Build release | `./gradlew :composeApp:assembleRelease` |
-| Install on device | `./gradlew :composeApp:installDebug` |
-| Run tests | `./gradlew :composeApp:test` |
-| Clean | `./gradlew clean` |
+### Architecture
+- use MVVM.
+- keep business or configuration logic separate from UI.
+- Follow Googles Android app architecture Guide.
 
-## Coding Guidelines
+## What NOT to Suggest
 
-1. **Dependencies**: always add to `gradle/libs.versions.toml` and reference as `libs.<alias>` — never hardcode versions.
-2. **No XML layouts**: UI is entirely Compose — `@Composable` functions only.
-3. **Platform abstraction**: shared interfaces in `commonMain`, Android implementations in `androidMain`.
-4. **State**: hoist state up; prefer ViewModel (`libs.androidx.lifecycle.viewmodelCompose`) for screen-level state.
-5. **Code style**: Kotlin official. No unused imports. Explicit types on public APIs.
-6. **JVM 11**: do not use APIs from Java 17+.
-7. **R resources**: `android.nonTransitiveRClass=true` — reference only resources declared in the same module.
-8. **Edge-to-edge**: insets are enabled globally — use `safeContentPadding()` or `WindowInsets` in composables.
-
-## Do Not Suggest
-
-- Encryption, Android Keystore, or security hardening — intentionally omitted by design.
-- Cloud sync, remote backup, or user accounts.
-- Biometric auth or app lock screens.
-
-## Do Not
-
-- Add new Gradle targets (iOS, JVM Desktop, JS/WASM) without explicit instruction.
-- Use `kapt`; use KSP if annotation processing is needed.
-- Hardcode SDK versions — always read from `libs.versions.android.*`.
-- Commit `local.properties`, `.gradle/`, `build/`, or `.idea/`.
-- Break Gradle configuration cache (`--no-configuration-cache` is forbidden).
+- Do not suggest encryption, keystores, or security hardening — this is intentionally unencrypted by design.
+- Do not suggest cloud sync, accounts, or remote backup.
+- Do not add biometric auth or lock screens — it's a dev tool, not a production app.

@@ -16,20 +16,23 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.core.net.toUri
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import com.example.pwunsafe.ui.screen.AddEditCredentialScreen
 import com.example.pwunsafe.ui.screen.CredentialListScreen
 import com.example.pwunsafe.ui.theme.PwUnsafeTheme
 import com.example.pwunsafe.ui.viewmodel.CredentialViewModel
+import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 
-private const val ROUTE_LIST = "list"
-private const val ROUTE_ADD_EDIT = "add_edit"
-private const val ARG_CREDENTIAL_ID = "credentialId"
+@Serializable
+private data object ListRoute : NavKey
+
+@Serializable
+private data class AddEditRoute(val credentialId: String? = null) : NavKey
 
 private fun hasStorageAccess(context: android.content.Context): Boolean =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -104,7 +107,7 @@ fun App() {
                 confirmButton = {
                     TextButton(onClick = {
                         val intent = Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
-                            data = Uri.parse("package:${context.packageName}")
+                            data = "package:${context.packageName}".toUri()
                         }
                         autofillSettingsLauncher.launch(intent)
                     }) {
@@ -119,39 +122,33 @@ fun App() {
             )
         }
 
-        val navController = rememberNavController()
+        val backStack = rememberNavBackStack(ListRoute)
         val viewModel: CredentialViewModel = koinViewModel()
 
-        NavHost(navController = navController, startDestination = ROUTE_LIST) {
-            composable(ROUTE_LIST) {
-                CredentialListScreen(
-                    viewModel = viewModel,
-                    onAddNew = { navController.navigate(ROUTE_ADD_EDIT) },
-                    onEdit = { id -> navController.navigate("$ROUTE_ADD_EDIT?$ARG_CREDENTIAL_ID=$id") },
-                )
-            }
-            composable(
-                route = "$ROUTE_ADD_EDIT?$ARG_CREDENTIAL_ID={$ARG_CREDENTIAL_ID}",
-                arguments = listOf(
-                    navArgument(ARG_CREDENTIAL_ID) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                ),
-            ) { backStackEntry ->
-                val credentialId = backStackEntry.arguments?.getString(ARG_CREDENTIAL_ID)
-                val credentials by viewModel.credentials.collectAsState()
-                val initial = credentialId?.let { id -> credentials.find { it.id == id } }
-                AddEditCredentialScreen(
-                    initial = initial,
-                    onSave = { cred ->
-                        if (credentialId == null) viewModel.add(cred) else viewModel.update(cred)
-                        navController.popBackStack()
-                    },
-                    onDismiss = { navController.popBackStack() },
-                )
-            }
-        }
+        NavDisplay(
+            backStack = backStack,
+            onBack = { backStack.removeLastOrNull() },
+            entryProvider = entryProvider {
+                entry<ListRoute> {
+                    CredentialListScreen(
+                        viewModel = viewModel,
+                        onAddNew = { backStack.add(AddEditRoute()) },
+                        onEdit = { id -> backStack.add(AddEditRoute(credentialId = id)) },
+                    )
+                }
+                entry<AddEditRoute> { key ->
+                    val credentials by viewModel.credentials.collectAsState()
+                    val initial = key.credentialId?.let { id -> credentials.find { it.id == id } }
+                    AddEditCredentialScreen(
+                        initial = initial,
+                        onSave = { cred ->
+                            if (key.credentialId == null) viewModel.add(cred) else viewModel.update(cred)
+                            backStack.removeLastOrNull()
+                        },
+                        onDismiss = { backStack.removeLastOrNull() },
+                    )
+                }
+            },
+        )
     }
 }
